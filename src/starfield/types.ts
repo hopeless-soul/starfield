@@ -19,8 +19,10 @@ export interface LayerConfig {
   yScale: number
   /** Multiplier applied to each star's base angular speed. */
   speedMult: number
-  /** Multiplier applied to the smoothed scroll speed for this layer. */
+  /** Multiplier applied to the scroll contribution to rotation speed. */
   scrollMult: number
+  /** Multiplier applied to the vertical up/down drift on scroll. */
+  driftMult: number
   color: string
 }
 

@@ -52,7 +52,7 @@ export function projectStar(
     y:
       cy +
       Math.sin(star.angle) * r * layer.yScale +
-      scrollSpeed * layer.scrollMult * SCROLL_TO_DRIFT,
+      scrollSpeed * layer.driftMult * SCROLL_TO_DRIFT,
   }
 }
 

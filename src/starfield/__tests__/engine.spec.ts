@@ -48,23 +48,23 @@ describe('updateStars', () => {
     expect(star.angle).toBeCloseTo(0.05 * CLOSE_LAYER.speedMult * 2, 10)
   })
 
-  it('applies the far layer 1.1 speed and 1.2 scroll multipliers', () => {
-    expect(FAR_LAYER.speedMult).toBe(1.1)
-    expect(FAR_LAYER.scrollMult).toBe(1.2)
+  it('applies each layer’s speed and scroll multipliers', () => {
     const scroll = 500
     const dt = 1
-    const close = makeStar({ speed: 0.05 })
-    const far = makeStar({ speed: 0.05 })
-    updateStars([close], CLOSE_LAYER, scroll, dt)
-    updateStars([far], FAR_LAYER, scroll, dt)
-    expect(close.angle).toBeCloseTo((0.05 * 1 + scroll * 1 * SCROLL_TO_ANGULAR) * dt, 10)
-    expect(far.angle).toBeCloseTo((0.05 * 1.1 + scroll * 1.2 * SCROLL_TO_ANGULAR) * dt, 10)
+    for (const layer of [CLOSE_LAYER, FAR_LAYER]) {
+      const star = makeStar({ speed: 0.05 })
+      updateStars([star], layer, scroll, dt)
+      expect(star.angle).toBeCloseTo(
+        (0.05 * layer.speedMult + scroll * layer.scrollMult * SCROLL_TO_ANGULAR) * dt,
+        10,
+      )
+    }
   })
 
   it('reverses the scroll contribution for negative scroll speed', () => {
     const star = makeStar({ speed: 0 })
     updateStars([star], CLOSE_LAYER, -500, 1)
-    expect(star.angle).toBeCloseTo(-500 * SCROLL_TO_ANGULAR, 10)
+    expect(star.angle).toBeCloseTo(-500 * CLOSE_LAYER.scrollMult * SCROLL_TO_ANGULAR, 10)
   })
 })
 
@@ -83,17 +83,25 @@ describe('projectStar', () => {
   it('stretches the far layer y-offset by 1.5 (oval orbit)', () => {
     expect(FAR_LAYER.yScale).toBe(1.5)
     const star = makeStar({ angle: Math.PI / 4, radius: 0.6 })
-    const close = projectStar(star, { ...CLOSE_LAYER, scrollMult: 1 }, 0, cx, cy, maxRadius)
+    const close = projectStar(star, CLOSE_LAYER, 0, cx, cy, maxRadius)
     const far = projectStar(star, FAR_LAYER, 0, cx, cy, maxRadius)
     expect(far.x).toBeCloseTo(close.x, 8)
     expect(far.y - cy).toBeCloseTo((close.y - cy) * 1.5, 8)
   })
 
-  it('adds a pure vertical drift for non-zero scroll speed', () => {
+  it('adds a pure vertical drift scaled by the layer driftMult', () => {
     const star = makeStar({ angle: 1.1, radius: 0.4 })
     const rest = projectStar(star, CLOSE_LAYER, 0, cx, cy, maxRadius)
     const scrolled = projectStar(star, CLOSE_LAYER, 200, cx, cy, maxRadius)
     expect(scrolled.x).toBe(rest.x)
-    expect(scrolled.y - rest.y).toBeCloseTo(200 * CLOSE_LAYER.scrollMult * SCROLL_TO_DRIFT, 8)
+    expect(scrolled.y - rest.y).toBeCloseTo(200 * CLOSE_LAYER.driftMult * SCROLL_TO_DRIFT, 8)
+  })
+
+  it('drift is independent of scrollMult and differs per layer via driftMult', () => {
+    const star = makeStar({ angle: 0, radius: 0.4 })
+    const layer = { ...CLOSE_LAYER, scrollMult: 99, driftMult: 2 }
+    const rest = projectStar(star, layer, 0, cx, cy, maxRadius)
+    const scrolled = projectStar(star, layer, 100, cx, cy, maxRadius)
+    expect(scrolled.y - rest.y).toBeCloseTo(100 * 2 * SCROLL_TO_DRIFT, 8)
   })
 })

@@ -4,7 +4,7 @@ import StarfieldBackground from '@/components/StarfieldBackground.vue'
 
 <template>
   <StarfieldBackground />
-  <main class="relative z-10 mx-auto max-w-md px-6 py-24 text-neutral-200">
+  <main class="relative z-10 mx-auto max-w-md px-6 py-12 md:py-24 text-neutral-200">
     <h1 class="mb-6 text-3xl font-semibold text-white">The Quiet Depths</h1>
     <p class="mb-4 leading-relaxed">
       Far below the surface, where daylight thins into rumor, the catfish moves like a slow thought.

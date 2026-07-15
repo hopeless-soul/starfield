@@ -21,6 +21,16 @@ export function createStars(layer: LayerConfig, seeds: SeedSet, layerIndex: numb
   }))
 }
 
+/**
+ * Moves current toward target by at most maxDelta. Used to slew-limit the
+ * rendered scroll speed: after a frame stall the smoothed value may have
+ * jumped far ahead, and the drift offset is a direct function of it, so an
+ * unbounded step would teleport every star vertically.
+ */
+export function approach(current: number, target: number, maxDelta: number): number {
+  return current + Math.min(Math.max(target - current, -maxDelta), maxDelta)
+}
+
 /** Advances orbit angles: base speed plus scroll contribution, scaled by dt (s). */
 export function updateStars(
   stars: Star[],

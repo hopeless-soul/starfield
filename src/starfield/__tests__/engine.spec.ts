@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { CLOSE_LAYER, FAR_LAYER, SCROLL_TO_ANGULAR, SCROLL_TO_DRIFT, SEEDS } from '../config'
-import { createStars, projectStar, updateStars } from '../engine'
+import { approach, createStars, projectStar, updateStars } from '../engine'
 import type { Star } from '../types'
 
 const makeStar = (overrides: Partial<Star> = {}): Star => ({
@@ -65,6 +65,22 @@ describe('updateStars', () => {
     const star = makeStar({ speed: 0 })
     updateStars([star], CLOSE_LAYER, -500, 1)
     expect(star.angle).toBeCloseTo(-500 * CLOSE_LAYER.scrollMult * SCROLL_TO_ANGULAR, 10)
+  })
+})
+
+describe('approach', () => {
+  it('returns the target when within maxDelta', () => {
+    expect(approach(10, 12, 5)).toBe(12)
+    expect(approach(10, 7, 5)).toBe(7)
+  })
+
+  it('limits the step to maxDelta in either direction', () => {
+    expect(approach(0, 1000, 30)).toBe(30)
+    expect(approach(0, -1000, 30)).toBe(-30)
+  })
+
+  it('is stable at the target', () => {
+    expect(approach(42, 42, 5)).toBe(42)
   })
 })
 

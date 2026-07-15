@@ -60,28 +60,36 @@ export function useScrollVelocity(target: EventTarget = window): ScrollVelocity 
   }
 
   let lastTouchY: number | undefined
+  let touchId: number | undefined
 
-  const onTouchStart = (event: Event) => {
-    lastTouchY = (event as TouchEvent).touches[0]?.clientY
+  const seedTouch = (event: Event) => {
+    const touch = (event as TouchEvent).touches[0]
+    touchId = touch?.identifier
+    lastTouchY = touch?.clientY
   }
 
   const onTouchMove = (event: Event) => {
-    const touchY = (event as TouchEvent).touches[0]?.clientY
-    if (touchY === undefined || lastTouchY === undefined) return
+    const touch = (event as TouchEvent).touches[0]
+    if (!touch) return
+    // If touches[0] is suddenly a different finger (second finger down, or
+    // one of two lifted), a delta across the two positions would be garbage
+    // and lurch the stars — re-seed and wait for the next move instead.
+    if (touch.identifier !== touchId || lastTouchY === undefined) {
+      touchId = touch.identifier
+      lastTouchY = touch.clientY
+      return
+    }
     // Finger up = scrolling down = positive, matching wheel deltaY semantics.
-    applyDelta((lastTouchY - touchY) * TOUCH_GAIN)
-    lastTouchY = touchY
-  }
-
-  const onTouchEnd = () => {
-    lastTouchY = undefined
+    applyDelta((lastTouchY - touch.clientY) * TOUCH_GAIN)
+    lastTouchY = touch.clientY
   }
 
   target.addEventListener('wheel', onWheel, { passive: true })
-  target.addEventListener('touchstart', onTouchStart, { passive: true })
+  target.addEventListener('touchstart', seedTouch, { passive: true })
   target.addEventListener('touchmove', onTouchMove, { passive: true })
-  target.addEventListener('touchend', onTouchEnd, { passive: true })
-  target.addEventListener('touchcancel', onTouchEnd, { passive: true })
+  // On (partial) release, re-seed from whichever touch remains, if any.
+  target.addEventListener('touchend', seedTouch, { passive: true })
+  target.addEventListener('touchcancel', seedTouch, { passive: true })
 
   return {
     get speed() {
@@ -89,10 +97,10 @@ export function useScrollVelocity(target: EventTarget = window): ScrollVelocity 
     },
     destroy() {
       target.removeEventListener('wheel', onWheel)
-      target.removeEventListener('touchstart', onTouchStart)
+      target.removeEventListener('touchstart', seedTouch)
       target.removeEventListener('touchmove', onTouchMove)
-      target.removeEventListener('touchend', onTouchEnd)
-      target.removeEventListener('touchcancel', onTouchEnd)
+      target.removeEventListener('touchend', seedTouch)
+      target.removeEventListener('touchcancel', seedTouch)
       clearTimeout(decayTimeout)
       animatable.revert()
     },

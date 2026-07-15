@@ -2,8 +2,8 @@
 import { onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { createTimer, type Timer } from 'animejs'
 import { useScrollVelocity, type ScrollVelocity } from '@/composables/useScrollVelocity'
-import { LAYERS, SEEDS } from '@/starfield/config'
-import { createStars, drawStars, updateStars } from '@/starfield/engine'
+import { LAYERS, MAX_FRAME_TIME, SEEDS, SPEED_SLEW } from '@/starfield/config'
+import { approach, createStars, drawStars, updateStars } from '@/starfield/engine'
 
 const canvasRef = useTemplateRef('canvas')
 
@@ -34,12 +34,18 @@ onMounted(() => {
   }))
   scroll = useScrollVelocity()
 
+  // Speed value actually used for rendering: follows scroll.speed but with a
+  // bounded rate of change, so a frame stall (common during touch scrolling)
+  // can't make the drift offset — a direct function of speed — jump.
+  let renderSpeed = 0
+
   timer = createTimer({
     onUpdate: (self) => {
-      const dt = self.deltaTime / 1000
+      const dt = Math.min(self.deltaTime / 1000, MAX_FRAME_TIME)
       const width = window.innerWidth
       const height = window.innerHeight
-      const speed = scroll!.speed
+      renderSpeed = approach(renderSpeed, scroll!.speed, SPEED_SLEW * dt)
+      const speed = renderSpeed
       ctx.clearRect(0, 0, width, height)
       for (const { layer, stars } of layers) {
         updateStars(stars, layer, speed, dt)

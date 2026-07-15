@@ -16,10 +16,15 @@ function wheel(target: EventTarget, deltaY: number) {
   target.dispatchEvent(event)
 }
 
-function touch(target: EventTarget, type: 'touchstart' | 'touchmove' | 'touchend', clientY = 0) {
-  // Same trick for TouchEvent: only touches[0].clientY is read.
+function touch(
+  target: EventTarget,
+  type: 'touchstart' | 'touchmove' | 'touchend',
+  clientY = 0,
+  identifier = 0,
+) {
+  // Same trick for TouchEvent: only touches[0].clientY/identifier are read.
   const event = new Event(type)
-  Object.assign(event, { touches: type === 'touchend' ? [] : [{ clientY }] })
+  Object.assign(event, { touches: type === 'touchend' ? [] : [{ clientY, identifier }] })
   target.dispatchEvent(event)
 }
 
@@ -86,6 +91,22 @@ describe('useScrollVelocity', () => {
     touch(target, 'touchmove', 300)
     await sleep(120)
     expect(velocity.speed).toBe(0)
+  })
+
+  it('re-seeds instead of computing a delta when the tracked finger changes', async () => {
+    const target = new EventTarget()
+    velocity = useScrollVelocity(target)
+
+    touch(target, 'touchstart', 500, 1)
+    touch(target, 'touchmove', 490, 1) // small legit delta: +10
+    // touches[0] becomes a different finger far away — must not read as a
+    // 440px swipe.
+    touch(target, 'touchmove', 50, 2)
+    touch(target, 'touchmove', 45, 2) // small legit delta on the new finger
+
+    await sleep(400)
+    expect(velocity.speed).toBeGreaterThan(0)
+    expect(velocity.speed).toBeLessThan(100) // only the two small deltas
   })
 
   it('does not let a small delta override a higher pending target', async () => {

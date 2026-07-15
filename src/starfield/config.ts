@@ -12,6 +12,10 @@ export const SEEDS: SeedSet = {
 export const SCROLL_TO_ANGULAR = 0.0006
 /** Converts smoothed scroll speed into vertical drift (px per unit). */
 export const SCROLL_TO_DRIFT = 0.36
+/** Cap on per-frame delta time (s) so dropped frames can't jump star angles. */
+export const MAX_FRAME_TIME = 0.1
+/** Max change per second of the speed value used for rendering (units/s). */
+export const SPEED_SLEW = 9000
 
 /** Layer 1 — close stars: circular orbits, larger and brighter. */
 export const CLOSE_LAYER: LayerConfig = {

@@ -8,7 +8,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/starfield/',
+  // GitHub Pages serves from /starfield/; everywhere else (Vercel, local preview) from the root
+  base: process.env.GITHUB_ACTIONS ? '/starfield/' : '/',
   plugins: [vue(), vueJsx(), vueDevTools(), tailwindcss()],
   resolve: {
     alias: {

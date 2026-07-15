@@ -2,7 +2,7 @@ import { createAnimatable, utils } from 'animejs'
 
 const WHEEL_GAIN = 1
 /** Touchmove deltas are a few px per event vs ~100 per wheel notch. */
-const TOUCH_GAIN = 2
+const TOUCH_GAIN = 1.5
 const MAX_SPEED = 3000
 /** How long anime eases toward a new wheel target (ms). */
 const SMOOTH_DURATION = 350
@@ -33,11 +33,26 @@ export function useScrollVelocity(target: EventTarget = window): ScrollVelocity 
   // assert it exists (createAnimatable always defines it for `speed` above).
   const animateSpeed = animatable.speed!
   let decayTimeout: ReturnType<typeof setTimeout> | undefined
+  // Accumulate on an explicit target rather than the smoothed state.speed:
+  // the smoothed value lags behind, so "state.speed + small delta" would let
+  // a gentle input override a higher target still being eased toward.
+  let targetSpeed = 0
+  let decaying = false
 
   const applyDelta = (delta: number) => {
-    animateSpeed(utils.clamp(state.speed + delta, -MAX_SPEED, MAX_SPEED))
+    if (decaying) {
+      // Resume from wherever the glide-to-zero has actually reached.
+      targetSpeed = state.speed
+      decaying = false
+    }
+    targetSpeed = utils.clamp(targetSpeed + delta, -MAX_SPEED, MAX_SPEED)
+    animateSpeed(targetSpeed)
     clearTimeout(decayTimeout)
-    decayTimeout = setTimeout(() => animateSpeed(0, DECAY_DURATION), DECAY_DELAY)
+    decayTimeout = setTimeout(() => {
+      decaying = true
+      targetSpeed = 0
+      animateSpeed(0, DECAY_DURATION)
+    }, DECAY_DELAY)
   }
 
   const onWheel = (event: Event) => {

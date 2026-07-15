@@ -88,6 +88,23 @@ describe('useScrollVelocity', () => {
     expect(velocity.speed).toBe(0)
   })
 
+  it('does not let a small delta override a higher pending target', async () => {
+    const target = new EventTarget()
+    velocity = useScrollVelocity(target)
+
+    wheel(target, 1000)
+    await sleep(100) // smoothed value still well below the 1000 target
+    const mid = velocity.speed
+    expect(mid).toBeGreaterThan(0)
+    expect(mid).toBeLessThan(1000)
+
+    // A gentle follow-up input must keep easing toward ~1005, not retarget
+    // down to "current smoothed value + 5".
+    wheel(target, 5)
+    await sleep(400)
+    expect(velocity.speed).toBeGreaterThan(mid + 50)
+  })
+
   it('decays back toward zero after input stops', async () => {
     const target = new EventTarget()
     velocity = useScrollVelocity(target)

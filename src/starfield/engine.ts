@@ -80,10 +80,13 @@ export function drawStars(
   // Half-diagonal, so max-radius orbits reach the corners.
   const maxRadius = Math.hypot(cx, cy)
   ctx.fillStyle = layer.color
+  // One batched path + fill per layer: per-star fill() calls flush the
+  // rasterizer hundreds of times a frame and stutter on mobile GPUs.
+  ctx.beginPath()
   for (const star of stars) {
     const { x, y } = projectStar(star, layer, scrollSpeed, cx, cy, maxRadius)
-    ctx.beginPath()
+    ctx.moveTo(x + star.size, y)
     ctx.arc(x, y, star.size, 0, TWO_PI)
-    ctx.fill()
   }
+  ctx.fill()
 }

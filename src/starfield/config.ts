@@ -16,6 +16,12 @@ export const SCROLL_TO_DRIFT = 0.36
 export const MAX_FRAME_TIME = 0.1
 /** Max change per second of the speed value used for rendering (units/s). */
 export const SPEED_SLEW = 9000
+/**
+ * Cap on devicePixelRatio for the canvas backing store. Phones report DPR 3,
+ * which is ~9x the pixels of DPR 1 to fill every frame; for ~1px stars the
+ * difference past 2 is invisible but the fill cost is not.
+ */
+export const MAX_DPR = 2
 
 /** Layer 1 — close stars: circular orbits, larger and brighter. */
 export const CLOSE_LAYER: LayerConfig = {

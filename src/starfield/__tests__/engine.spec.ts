@@ -82,6 +82,12 @@ describe('approach', () => {
   it('is stable at the target', () => {
     expect(approach(42, 42, 5)).toBe(42)
   })
+
+  it('does not move for zero or negative maxDelta (garbage frame times)', () => {
+    expect(approach(10, 500, 0)).toBe(10)
+    expect(approach(10, 500, -1e12)).toBe(10)
+    expect(approach(10, 10, -1e12)).toBe(10)
+  })
 })
 
 describe('projectStar', () => {

@@ -28,6 +28,7 @@ export function createStars(layer: LayerConfig, seeds: SeedSet, layerIndex: numb
  * unbounded step would teleport every star vertically.
  */
 export function approach(current: number, target: number, maxDelta: number): number {
+  if (maxDelta <= 0) return current
   return current + Math.min(Math.max(target - current, -maxDelta), maxDelta)
 }
 

@@ -41,7 +41,10 @@ onMounted(() => {
 
   timer = createTimer({
     onUpdate: (self) => {
-      const dt = Math.min(self.deltaTime / 1000, MAX_FRAME_TIME)
+      // Clamp both sides: anime can report garbage (even hugely negative)
+      // deltaTime on the first ticks, and unlike the periodic angles, the
+      // slew-limited renderSpeed would be permanently poisoned by it.
+      const dt = Math.min(Math.max(self.deltaTime, 0), MAX_FRAME_TIME * 1000) / 1000
       const width = window.innerWidth
       const height = window.innerHeight
       renderSpeed = approach(renderSpeed, scroll!.speed, SPEED_SLEW * dt)

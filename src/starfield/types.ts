@@ -18,6 +18,7 @@ export interface LayerConfig {
   /** Vertical stretch of the orbit: 1 = circle, >1 = oval. */
   yScale: number
   /** Multiplier applied to each star's base angular speed. */
+  /** Note: A negative value reverses the direction. */
   speedMult: number
   /** Multiplier applied to the scroll contribution to rotation speed. */
   scrollMult: number

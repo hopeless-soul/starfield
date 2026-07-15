@@ -11,7 +11,7 @@ export const SEEDS: SeedSet = {
 /** Converts smoothed scroll speed into extra angular speed (rad/s per unit). */
 export const SCROLL_TO_ANGULAR = 0.0006
 /** Converts smoothed scroll speed into vertical drift (px per unit). */
-export const SCROLL_TO_DRIFT = 0.35
+export const SCROLL_TO_DRIFT = 0.36
 
 /** Layer 1 — close stars: circular orbits, larger and brighter. */
 export const CLOSE_LAYER: LayerConfig = {
@@ -21,9 +21,9 @@ export const CLOSE_LAYER: LayerConfig = {
   speedMin: 0.02,
   speedMax: 0.03,
   yScale: 1,
-  speedMult: 1,
-  scrollMult: 1.2,
-  driftMult: 1,
+  speedMult: -1,
+  scrollMult: -1.2,
+  driftMult: 0.5,
   color: 'rgba(255, 255, 255, 0.9)',
 }
 
@@ -35,11 +35,25 @@ export const FAR_LAYER: LayerConfig = {
   speedMin: 0.02,
   speedMax: 0.06,
   yScale: 1.5,
-  speedMult: 1,
-  scrollMult: 1.3,
-  driftMult: 1.2,
+  speedMult: -1,
+  scrollMult: -1.8,
+  driftMult: 0.6,
+  color: 'rgba(255, 255, 255, 0.45)',
+}
+
+/** Layer 3 — far stars: oval orbits (y × 1.5), faster multipliers, dimmer. */
+export const REVERSE_FAR_LAYER: LayerConfig = {
+  count: 90,
+  sizeMin: 0.2,
+  sizeMax: 0.5,
+  speedMin: 0.02,
+  speedMax: 0.06,
+  yScale: 1.5,
+  speedMult: -1,
+  scrollMult: 1.8,
+  driftMult: 0.6,
   color: 'rgba(255, 255, 255, 0.45)',
 }
 
 /** Draw order: far layer first so close stars render on top. */
-export const LAYERS: LayerConfig[] = [FAR_LAYER, CLOSE_LAYER]
+export const LAYERS: LayerConfig[] = [FAR_LAYER, CLOSE_LAYER, REVERSE_FAR_LAYER]

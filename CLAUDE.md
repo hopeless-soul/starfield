@@ -30,5 +30,3 @@ The code is deliberately split into a framework-free core and a thin Vue shell:
 Tests live in `__tests__/` directories next to the code they cover and target the framework-free modules only.
 
 `@` aliases to `src/` (vite.config.ts + tsconfig).
-
-Note: the top-level `starfield/` directory is an empty untracked leftover clone — ignore it; the real source is in `src/`.

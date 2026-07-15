@@ -21,6 +21,13 @@ export interface ScrollVelocity {
  * eases back to zero. The page decides which inputs feed it (defaults to
  * wheel + touch). Framework-free so it can be unit-tested; the caller owns
  * the lifecycle (call destroy() on unmount).
+ *
+ * There is no runtime device detection: every source in `sources` is
+ * attached and stays active for the lifetime of this instance. With the
+ * default, both wheel and touch listeners are registered on every device —
+ * the source whose events never fire simply stays silent. To restrict or
+ * tune inputs, pass an explicit array, e.g.
+ * `useScrollVelocity(window, [touchInput({ gain: 2 })])`.
  */
 export function useScrollVelocity(
   target: EventTarget = window,
@@ -57,6 +64,7 @@ export function useScrollVelocity(
     }, DECAY_DELAY)
   }
 
+  // Attach every source unconditionally; all of them feed the same sink.
   const detachFns = sources.map((source) => source(target, applyDelta))
 
   return {

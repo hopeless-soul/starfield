@@ -45,6 +45,8 @@ onMounted(() => {
     layer,
     stars: createStars(layer, SEEDS, index),
   }))
+  // Default sources: wheel + touch, both always attached (no device
+  // detection); pass a ScrollInput[] here to restrict or tune inputs.
   scroll = useScrollVelocity()
 
   // Speed value actually used for rendering: follows scroll.speed but with a
